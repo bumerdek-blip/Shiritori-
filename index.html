@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
+<!-- saved from url=(0042)file:///C:/Users/kb/Downloads/index_1.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Bird Shiritori</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<link href="./index_files/css2" rel="stylesheet">
 <style>
 /* ── VARIABLES ── */
 :root {
@@ -333,9 +333,9 @@ body {
 <div class="bg-layer"></div>
 <div class="clouds"><div class="cloud"></div><div class="cloud"></div><div class="cloud"></div></div>
 <svg class="deco-birds" width="80" height="40" viewBox="0 0 80 40">
-  <path d="M5,20 Q15,10 25,20 Q15,15 5,20" fill="#4a7c59" opacity="0.6"/>
-  <path d="M30,12 Q40,2 50,12 Q40,7 30,12" fill="#4a7c59" opacity="0.5"/>
-  <path d="M55,22 Q63,14 71,22 Q63,18 55,22" fill="#4a7c59" opacity="0.4"/>
+  <path d="M5,20 Q15,10 25,20 Q15,15 5,20" fill="#4a7c59" opacity="0.6"></path>
+  <path d="M30,12 Q40,2 50,12 Q40,7 30,12" fill="#4a7c59" opacity="0.5"></path>
+  <path d="M55,22 Q63,14 71,22 Q63,18 55,22" fill="#4a7c59" opacity="0.4"></path>
 </svg>
 
 <div id="app">
@@ -367,7 +367,7 @@ body {
       <h2>🌿 Season One: Birds</h2>
       <p>Complete each level to unlock the next</p>
       <div class="level-grid" id="level-grid"></div>
-      <button class="btn-secondary" onclick="showScreen('title')">← Back</button>
+      <button class="btn-secondary" onclick="showScreen(&#39;title&#39;)">← Back</button>
     </div>
   </div>
 
@@ -410,7 +410,7 @@ body {
 
       <div class="word-builder-actions">
         <button class="btn-clear" onclick="clearWord()">✕</button>
-        <button class="btn-submit-word" id="btn-submit" onclick="submitWord()" disabled>Submit →</button>
+        <button class="btn-submit-word" id="btn-submit" onclick="submitWord()" disabled="">Submit →</button>
       </div>
 
       <div class="feedback" id="feedback"></div>
@@ -600,6 +600,9 @@ const STATE = {
   // Tile input
   tiles:       [],   // [{letter, type:'must'|'bonus'|'plain', id}]
   selectedIds: [],   // ordered list of selected tile ids
+
+  // Set to true when player is submitting a hinted word — scores 0
+  hintWordActive: false,
 
   // Async guard
   validating: false,
@@ -867,6 +870,8 @@ function renderTiles() {
 // ── TILE INTERACTION ──────────────────────────────────────────────────────────
 
 function tapTile(id) {
+  // If player manually taps after a hint, they're on their own — restore scoring
+  STATE.hintWordActive = false;
   const idx = STATE.selectedIds.indexOf(id);
   if (idx !== -1) {
     // Deselect: remove from wherever it is in the sequence
@@ -879,6 +884,7 @@ function tapTile(id) {
 }
 
 function clearWord() {
+  STATE.hintWordActive = false;
   STATE.selectedIds = [];
   updateBuilderDisplay();
   renderTiles();
@@ -1149,8 +1155,9 @@ function startLevel(levelIdx) {
   STATE.usedWords    = new Set([birdClean.toLowerCase()]);
   STATE.timeLeft     = 60;
   STATE.paused       = false;
-  STATE.hintVisible  = false;
-  STATE.hintUsed     = false;
+  STATE.hintVisible    = false;
+  STATE.hintUsed       = false;
+  STATE.hintWordActive = false;
   STATE.validating   = false;
   STATE.selectedIds  = [];
   STATE.tiles        = generateTiles(birdClean);
@@ -1260,8 +1267,11 @@ async function submitWord() {
   }
 
   // ── Word accepted ──────────────────────────────────────────────────────────
-  const isBird = BIRD_SET.has(raw.toLowerCase());
-  const points = calcScore(raw.length, matchLen, isBird);
+  const isBird     = BIRD_SET.has(raw.toLowerCase());
+  // Score 0 if this word was provided by the hint system
+  const points     = STATE.hintWordActive ? 0 : calcScore(raw.length, matchLen, isBird);
+  const wasHinted  = STATE.hintWordActive;
+  STATE.hintWordActive = false;   // reset for next word
 
   STATE.chain.push({ word: raw, matchLen, isBird, points });
   STATE.usedWords.add(raw.toLowerCase());
@@ -1276,14 +1286,15 @@ async function submitWord() {
   updateScoreUI();
 
   let msg = '';
-  if (isBird)          msg = '🐦 Bird bonus! ×1.5';
-  else if (matchLen >= 4) msg = '🔥 Amazing chain! ×2';
-  else if (matchLen >= 3) msg = '✨ Great chain! ×1.5';
-  else if (matchLen >= 2) msg = '👍 Nice chain! ×1.25';
-  showFeedback(msg, 'success');
+  if (wasHinted)           msg = '💡 Hint used — no points';
+  else if (isBird)         msg = '🐦 Bird bonus! ×1.5';
+  else if (matchLen >= 4)  msg = '🔥 Amazing chain! ×2';
+  else if (matchLen >= 3)  msg = '✨ Great chain! ×1.5';
+  else if (matchLen >= 2)  msg = '👍 Nice chain! ×1.25';
+  showFeedback(msg, wasHinted ? 'error' : 'success');
 
-  showScorePopup(points, isBird, matchLen, raw.length);
-  playChirp(isBird, matchLen);
+  if (!wasHinted) showScorePopup(points, isBird, matchLen, raw.length);
+  playChirp(wasHinted ? false : isBird, wasHinted ? 0 : matchLen);
 
   renderChain();
   renderTiles();
@@ -1365,7 +1376,7 @@ async function useHint() {
     ? `Try: ${hint} (0 pts)`
     : 'No hint available';
 
-  if (hint) autoSelectHint(hint);
+  if (hint) { STATE.hintWordActive = true; autoSelectHint(hint); }
 }
 
 </script>
@@ -1405,5 +1416,6 @@ function buildLevelGrid() {
 }
 
 </script>
-</body>
-</html>
+
+
+</body></html>
