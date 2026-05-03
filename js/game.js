@@ -187,17 +187,43 @@ async function useHint() {
   document.getElementById('btn-hint').style.display = 'none';
   document.getElementById('hint-word').textContent  = 'Finding a hint...';
 
-  // Find a word in COMMON_WORDS starting with the longest suffix match possible
+  // The must letter is always the last letter of the current word.
+  const mustLetter = STATE.currentWord.slice(-1).toLowerCase();
+
+  // Build a frequency map of available tile letters so we can check
+  // whether a candidate word can actually be spelled with the current tiles.
+  function canSpellWithTiles(word) {
+    const available = {};
+    STATE.tiles.forEach(t => {
+      const l = t.letter.toLowerCase();
+      available[l] = (available[l] || 0) + 1;
+    });
+    for (const ch of word.toLowerCase()) {
+      if (!available[ch]) return false;
+      available[ch]--;
+    }
+    return true;
+  }
+
+  // Prefer longer chain matches (more bonus), but always validate against tiles.
   let hint = '';
   for (let len = Math.min(4, STATE.currentWord.length); len >= 1; len--) {
-    const sfx       = STATE.currentWord.slice(-len).toLowerCase();
+    const sfx        = STATE.currentWord.slice(-len).toLowerCase();
     const candidates = COMMON_WORDS.filter(w =>
-      w.startsWith(sfx) && w.length >= 3 && !STATE.usedWords.has(w)
+      w.startsWith(sfx) && w.length >= 3 && !STATE.usedWords.has(w) && canSpellWithTiles(w)
     );
     if (candidates.length) {
       hint = candidates[Math.floor(Math.random() * Math.min(candidates.length, 5))].toUpperCase();
       break;
     }
+  }
+
+  // Safety net: any word starting with must letter that fits the tiles
+  if (!hint) {
+    const fallback = COMMON_WORDS.filter(w =>
+      w.startsWith(mustLetter) && w.length >= 3 && !STATE.usedWords.has(w) && canSpellWithTiles(w)
+    );
+    if (fallback.length) hint = fallback[0].toUpperCase();
   }
 
   document.getElementById('hint-word').textContent = hint
