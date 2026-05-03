@@ -14,8 +14,9 @@ function startLevel(levelIdx) {
   STATE.usedWords    = new Set([birdClean.toLowerCase()]);
   STATE.timeLeft     = 60;
   STATE.paused       = false;
-  STATE.hintVisible  = false;
-  STATE.hintUsed     = false;
+  STATE.hintVisible    = false;
+  STATE.hintUsed       = false;
+  STATE.hintWordActive = false;
   STATE.validating   = false;
   STATE.selectedIds  = [];
   STATE.tiles        = generateTiles(birdClean);
@@ -88,12 +89,12 @@ async function submitWord() {
   }
 
   // Chain check: must start with the last letter of currentWord
-  const { matchLen, hasMust } = getChainInfo(STATE.currentWord, raw);
+  const { hasMust } = getChainInfo(STATE.currentWord, raw);
   if (!hasMust) {
     showFeedback(`Must start with "${STATE.currentWord.slice(-1)}" (the bright gold tile)`, 'error');
     flashBuilder();
     playBawk();
-    clearWord();   // clear input on bad attempt
+    clearWord();
     return;
   }
 
@@ -125,8 +126,12 @@ async function submitWord() {
   }
 
   // ── Word accepted ──────────────────────────────────────────────────────────
-  const isBird = BIRD_SET.has(raw.toLowerCase());
-  const points = calcScore(raw.length, matchLen, isBird);
+  const isBird      = BIRD_SET.has(raw.toLowerCase());
+  const bonusCount  = countBonusTilesUsed(STATE.selectedIds, STATE.tiles);
+  // Score 0 if this word was provided by the hint system
+  const points      = STATE.hintWordActive ? 0 : calcScore(raw.length, bonusCount, isBird);
+  const wasHinted   = STATE.hintWordActive;
+  STATE.hintWordActive = false;   // reset for next word
 
   STATE.chain.push({ word: raw, matchLen, isBird, points });
   STATE.usedWords.add(raw.toLowerCase());
@@ -141,14 +146,18 @@ async function submitWord() {
   updateScoreUI();
 
   let msg = '';
-  if (isBird)          msg = '🐦 Bird bonus! ×1.5';
-  else if (matchLen >= 4) msg = '🔥 Amazing chain! ×2';
-  else if (matchLen >= 3) msg = '✨ Great chain! ×1.5';
-  else if (matchLen >= 2) msg = '👍 Nice chain! ×1.25';
-  showFeedback(msg, 'success');
+  if (wasHinted)            msg = '💡 Hint used — no points';
+  else if (isBird && bonusCount >= 3) msg = '🐦🔥 Bird + ×2.5 chain!';
+  else if (isBird && bonusCount >= 2) msg = '🐦✨ Bird + ×2 chain!';
+  else if (isBird && bonusCount >= 1) msg = '🐦 Bird + ×1.5 chain!';
+  else if (isBird)          msg = '🐦 Bird bonus! ×1.5';
+  else if (bonusCount >= 3) msg = '🔥 Amazing chain! ×2.5';
+  else if (bonusCount >= 2) msg = '✨ Great chain! ×2';
+  else if (bonusCount >= 1) msg = '👍 Nice chain! ×1.5';
+  showFeedback(msg, wasHinted ? 'error' : 'success');
 
-  showScorePopup(points, isBird, matchLen, raw.length);
-  playChirp(isBird, matchLen);
+  if (!wasHinted) showScorePopup(points, isBird, bonusCount, raw.length);
+  playChirp(wasHinted ? false : isBird, wasHinted ? 0 : bonusCount);
 
   renderChain();
   renderTiles();
@@ -230,5 +239,5 @@ async function useHint() {
     ? `Try: ${hint} (0 pts)`
     : 'No hint available';
 
-  if (hint) autoSelectHint(hint);
+  if (hint) { STATE.hintWordActive = true; autoSelectHint(hint); }
 }

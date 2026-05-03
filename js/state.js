@@ -25,6 +25,9 @@ const STATE = {
   tiles:       [],   // [{letter, type:'must'|'bonus'|'plain', id}]
   selectedIds: [],   // ordered list of selected tile ids
 
+  // Set to true when player is submitting a hinted word — scores 0
+  hintWordActive: false,
+
   // Async guard
   validating: false,
 };
@@ -37,49 +40,44 @@ function saveProgress() {
 // ── SCORING ───────────────────────────────────────────────────────────────────
 
 /**
- * How many letters at the START of newWord match a suffix of currentWord.
- * The last letter of currentWord (1 char) is the REQUIRED minimum match.
- * Matching more of the tail earns bonus multiplier.
- *
- * Returns { matchLen, hasMust }
- *   matchLen – number of leading letters that chain (0 if invalid)
- *   hasMust  – true if the required last letter is included
+ * Check if the new word starts with the must letter (last letter of currentWord).
+ * Returns { hasMust }
  */
 function getChainInfo(currentWord, newWord) {
-  const c = currentWord.toUpperCase();
-  const n = newWord.toUpperCase();
-
-  // Required: newWord must start with the last letter of currentWord
-  const mustLetter = c[c.length - 1];
-  if (n[0] !== mustLetter) return { matchLen: 0, hasMust: false };
-
-  // Check how many more letters continue the chain (up to 4 total)
-  let matchLen = 1;
-  const maxCheck = Math.min(c.length, n.length, 4);
-  for (let len = 2; len <= maxCheck; len++) {
-    if (c.endsWith(n.slice(0, len))) matchLen = len;
-  }
-
-  return { matchLen, hasMust: true };
+  const mustLetter = currentWord[currentWord.length - 1].toUpperCase();
+  const hasMust = newWord[0].toUpperCase() === mustLetter;
+  return { hasMust };
 }
 
 /**
- * Chain multiplier based on how many trailing letters were matched.
- *   1 letter  = ×1.0  (just the required last letter)
- *   2 letters = ×1.25
- *   3 letters = ×1.5
- *   4 letters = ×2.0
+ * Count how many bonus tiles (◆) were used anywhere in the submitted word.
+ * Each bonus tile used = +1 to bonusCount, regardless of letter.
+ * Tiles are matched by id so duplicates (e.g. two highlighted O's) count separately.
+ *
+ * selectedIds — ordered list of tile ids the player tapped
+ * tiles       — full tile array with type info
  */
-function getChainMultiplier(matchLen) {
-  if (matchLen >= 4) return 2.0;
-  if (matchLen === 3) return 1.5;
-  if (matchLen === 2) return 1.25;
-  return 1.0;
+function countBonusTilesUsed(selectedIds, tiles) {
+  return selectedIds.reduce((count, id) => {
+    const tile = tiles.find(t => t.id === id);
+    return count + (tile && tile.type === 'bonus' ? 1 : 0);
+  }, 0);
+}
+
+/**
+ * Multiplier based on how many bonus tiles were used anywhere in the word.
+ *   0 bonus tiles = ×1.0
+ *   1 bonus tile  = ×1.5
+ *   2 bonus tiles = ×2.0
+ *   3 bonus tiles = ×2.5
+ */
+function getChainMultiplier(bonusCount) {
+  return 1.0 + bonusCount * 0.5;
 }
 
 /** Final score for a word. Base = word length. */
-function calcScore(wordLen, matchLen, isBird) {
-  let mult = getChainMultiplier(matchLen);
+function calcScore(wordLen, bonusCount, isBird) {
+  let mult = getChainMultiplier(bonusCount);
   if (isBird) mult *= 1.5;
   return Math.round(wordLen * mult * 10) / 10;
 }

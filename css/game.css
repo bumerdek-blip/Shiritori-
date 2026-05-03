@@ -36,6 +36,14 @@
 .chain-word .chain-link { color:var(--gold-bright); font-weight:900; }
 .chain-arrow { color:var(--text-light); font-size:10px; }
 
+.chain-bonus-hint {
+  font-size: 11px;
+  color: var(--text-light);
+  margin-top: 5px;
+  line-height: 1.4;
+}
+.chain-bonus-hint strong { color: var(--gold-bonus); }
+
 /* ── WORD BUILDER ── */
 .word-builder {
   background: white; border:2px solid var(--sky-deep); border-radius:12px;

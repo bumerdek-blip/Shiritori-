@@ -14,19 +14,19 @@ function flashBuilder() {
 
 // ── SCORE POPUP ───────────────────────────────────────────────────────────────
 
-function showScorePopup(points, isBird, matchLen, baseLen) {
+function showScorePopup(points, isBird, bonusCount, baseLen) {
   const card = document.getElementById('game-card');
   const pop  = document.createElement('div');
   pop.className = 'score-popup';
 
-  const chainMult = getChainMultiplier(matchLen);
+  const chainMult = getChainMultiplier(bonusCount);
   let html = `<span class="pop-base">+${baseLen} pts</span>`;
-  if (chainMult > 1) {
-    const label = matchLen >= 4 ? '×2 chain!' : matchLen === 3 ? '×1.5 chain' : '×1.25 chain';
-    html += `<span class="pop-chain">${label}</span>`;
+  if (bonusCount > 0) {
+    const multLabel = chainMult.toFixed(1).replace('.0','');
+    html += `<span class="pop-chain">×${multLabel} chain (${bonusCount} ◆)</span>`;
   }
   if (isBird) html += `<span class="pop-bird">🐦 ×1.5 bird!</span>`;
-  if (chainMult > 1 || isBird) html += `<span class="pop-total">= ${Math.round(points * 10) / 10}</span>`;
+  if (bonusCount > 0 || isBird) html += `<span class="pop-total">= ${Math.round(points * 10) / 10}</span>`;
 
   pop.innerHTML  = html;
   pop.style.left = (10 + Math.random() * 40) + '%';
@@ -60,6 +60,22 @@ function updateScoreUI() {
 
 // ── CHAIN DISPLAY ─────────────────────────────────────────────────────────────
 
+/**
+ * Returns a human-readable hint showing the bonus tile letters and multipliers.
+ * e.g. currentWord = "ROBIN" → must: N · bonus tiles: R O B I (use them for +0.5× each)
+ */
+function getChainHint(currentWord) {
+  const w = currentWord.toUpperCase();
+  const mustLetter = w[w.length - 1];
+  const bonusLetters = w.slice(-Math.min(w.length, 4), -1).split('');
+  let hint = `Must start with <strong style="color:var(--gold-bright)">${mustLetter}</strong>`;
+  if (bonusLetters.length > 0) {
+    const bl = bonusLetters.map(l => `<strong style="color:var(--gold-bonus)">${l}</strong>`).join(' ');
+    hint += ` · Use ◆ tiles anywhere for +×0.5 each: ${bl}`;
+  }
+  return hint;
+}
+
 function renderChain() {
   const wrap = document.getElementById('chain-words');
   wrap.innerHTML = '';
@@ -70,8 +86,15 @@ function renderChain() {
     sp.className   = 'chain-word bird-word';
     sp.textContent = STATE.currentWord;
     wrap.appendChild(sp);
+    // Update bonus hint
+    const hintEl = document.getElementById('chain-bonus-hint');
+    if (hintEl) hintEl.innerHTML = 'Start next word with: ' + getChainHint(STATE.currentWord);
     return;
   }
+
+  // Update bonus hint for current word
+  const hintEl = document.getElementById('chain-bonus-hint');
+  if (hintEl) hintEl.innerHTML = 'Start next word with: ' + getChainHint(STATE.currentWord);
 
   STATE.chain.slice(-6).forEach((entry, i) => {
     if (i > 0) {

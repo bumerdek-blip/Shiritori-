@@ -118,6 +118,8 @@ function renderTiles() {
 // ── TILE INTERACTION ──────────────────────────────────────────────────────────
 
 function tapTile(id) {
+  // If player manually taps after a hint, they're on their own — restore scoring
+  STATE.hintWordActive = false;
   const idx = STATE.selectedIds.indexOf(id);
   if (idx !== -1) {
     // Deselect: remove from wherever it is in the sequence
@@ -130,6 +132,7 @@ function tapTile(id) {
 }
 
 function clearWord() {
+  STATE.hintWordActive = false;
   STATE.selectedIds = [];
   updateBuilderDisplay();
   renderTiles();
