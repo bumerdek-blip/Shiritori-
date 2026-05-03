@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0042)file:///C:/Users/kb/Downloads/index_5.html -->
+<!-- saved from url=(0042)file:///C:/Users/kb/Downloads/index_6.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -334,6 +334,55 @@ body {
 .pause-overlay h2 { font-family:'Playfair Display',serif; font-size:28px; color:var(--bark); }
 .pause-overlay p  { font-size:12px; color:var(--text-light); }
 
+/* ── BIRD INFO MODAL ── */
+.bird-info-card {
+  max-width: 340px;
+  background: linear-gradient(160deg, #f0ebe0 0%, #e8f4ec 100%);
+}
+.bird-info-emoji {
+  font-size: 64px;
+  display: block;
+  text-align: center;
+  margin-bottom: 4px;
+  animation: bob 3s ease-in-out infinite;
+}
+.bird-info-level {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-bottom: 2px;
+}
+.bird-info-name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--bark);
+  text-align: center;
+  margin-bottom: 16px;
+}
+.bird-info-facts {
+  background: rgba(255,255,255,0.6);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(74,124,89,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bird-fact {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13px;
+  color: var(--text-mid);
+  line-height: 1.5;
+}
+.bird-fact-icon { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+
 </style>
 </head>
 <body>
@@ -441,6 +490,26 @@ body {
     </div>
   </div>
 
+</div>
+
+<!-- BIRD INFO MODAL -->
+<div class="modal-overlay" id="bird-info-modal">
+  <div class="modal-card bird-info-card">
+    <span class="bird-info-emoji" id="bird-info-emoji">🐦</span>
+    <div class="bird-info-level" id="bird-info-level">Level 1</div>
+    <div class="bird-info-name" id="bird-info-name">Robin</div>
+    <div class="bird-info-facts">
+      <div class="bird-fact">
+        <span class="bird-fact-icon">🌿</span>
+        <span id="bird-fact-1"></span>
+      </div>
+      <div class="bird-fact">
+        <span class="bird-fact-icon">🌿</span>
+        <span id="bird-fact-2"></span>
+      </div>
+    </div>
+    <button class="btn-primary" id="bird-info-btn" onclick="dismissBirdInfo()">Let's Play! →</button>
+  </div>
 </div>
 
 <!-- MODAL -->
@@ -579,6 +648,214 @@ const COMMON_WORDS = [
   "will","wilt","wind","wine","wing","wink","wire","wish","wisp","wolf","wood","wool",
   "word","work","worm","wrap","wren","write","yard","yarn","yawn","year","yell","yelp",
   "yoke","zeal","zero","zest","zone","zoom"
+];
+
+</script>
+<script>
+// ── BIRD FACTS ────────────────────────────────────────────────────────────────
+// Two fun facts per bird, kept short for a quick learning card
+
+const BIRD_FACTS = [
+  // 1 Robin
+  { fact1: "The robin's red breast is used to warn rivals away from its territory.", fact2: "Robins are one of the few birds that sing through winter, even at night near streetlamps." },
+  // 2 Wren
+  { fact1: "Despite being tiny, the wren has one of the loudest songs relative to its body size.", fact2: "Male wrens build several nests and let the female choose her favourite." },
+  // 3 Finch
+  { fact1: "Darwin's finches in the Galápagos inspired his theory of evolution.", fact2: "Finches have strong, conical beaks perfectly shaped for cracking open seeds." },
+  // 4 Dove
+  { fact1: "Doves have been symbols of peace for thousands of years across many cultures.", fact2: "Unlike most birds, doves can drink by sucking water rather than sipping and tilting their heads." },
+  // 5 Swan
+  { fact1: "Swans mate for life and can live for over 20 years in the wild.", fact2: "A group of swans in flight is called a 'wedge', and on water a 'bevy'." },
+  // 6 Crow
+  { fact1: "Crows are among the most intelligent animals on Earth — they can use tools and solve puzzles.", fact2: "Crows remember human faces and will hold grudges against people who have wronged them." },
+  // 7 Lark
+  { fact1: "The skylark can hover in place while singing continuously for several minutes.", fact2: "Larks inspired the phrase 'up with the lark', meaning to rise very early." },
+  // 8 Sparrow
+  { fact1: "House sparrows were introduced to North America in the 1850s and now number in the hundreds of millions.", fact2: "Sparrows take dust baths to keep their feathers free of parasites." },
+  // 9 Eagle
+  { fact1: "Eagles have eyesight up to 8 times sharper than humans — they can spot a rabbit from 3km away.", fact2: "The bald eagle's nest can weigh over a ton after years of additions." },
+  // 10 Goose
+  { fact1: "Geese fly in a V-formation to save energy — each bird benefits from the updraft of the one ahead.", fact2: "Canada geese are fiercely protective parents and will chase humans to defend their goslings." },
+  // 11 Heron
+  { fact1: "Herons stand motionless for long periods, then strike at fish with lightning speed.", fact2: "Despite their large size, herons weigh surprisingly little — only about 2kg." },
+  // 12 Crane
+  { fact1: "Cranes perform elaborate dancing displays during courtship, leaping and bowing to each other.", fact2: "The whooping crane was nearly extinct in the 1940s with only 15 birds remaining." },
+  // 13 Stork
+  { fact1: "Storks return to the same nest every year, adding to it each season — nests can reach 2m across.", fact2: "White storks have no vocal cords and communicate by clattering their bills together." },
+  // 14 Raven
+  { fact1: "Ravens have been kept at the Tower of London for centuries — legend says the kingdom will fall if they leave.", fact2: "Ravens play — they have been observed sliding down snowy rooftops repeatedly, apparently for fun." },
+  // 15 Bluebird
+  { fact1: "The eastern bluebird nearly vanished in the 20th century but was saved by volunteers installing nest boxes.", fact2: "Bluebirds are a symbol of happiness in many Native American traditions." },
+  // 16 Hawk
+  { fact1: "Hawks can dive at speeds over 240 km/h when hunting prey.", fact2: "Some hawks migrate thousands of miles each year, navigating by stars and magnetic fields." },
+  // 17 Cardinal
+  { fact1: "Only the male cardinal is bright red — females are a warm tan with red tinges.", fact2: "Cardinals are one of the few songbirds where females also sing, often from the nest." },
+  // 18 Pigeon
+  { fact1: "Pigeons can find their way home from 1800km away — their navigation abilities still puzzle scientists.", fact2: "Pigeons were awarded military medals in both World Wars for delivering vital messages." },
+  // 19 Falcon
+  { fact1: "The peregrine falcon is the fastest animal on Earth, diving at over 320 km/h.", fact2: "Falconry — hunting with trained falcons — is over 4,000 years old." },
+  // 20 Magpie
+  { fact1: "Magpies are one of the only non-mammal species that can recognise themselves in a mirror.", fact2: "A group of magpies is called a 'parliament'. They hold noisy gatherings when one of their group dies." },
+  // 21 Pelican
+  { fact1: "A pelican's throat pouch can hold up to 11 litres of water — three times its stomach capacity.", fact2: "Pelicans are surprisingly agile in the air, often soaring on thermals like eagles." },
+  // 22 Seagull
+  { fact1: "Seagulls can drink saltwater — they have special glands above their eyes that filter out the salt.", fact2: "Gulls stamp their feet on the ground to mimic rainfall, tricking earthworms into surfacing." },
+  // 23 Starling
+  { fact1: "A murmuration of starlings can contain millions of birds moving in perfect synchrony.", fact2: "Starlings are brilliant mimics — they can imitate phones, chainsaws and other birds." },
+  // 24 Swallow
+  { fact1: "Swallows migrate from Europe to South Africa — a round trip of over 20,000km.", fact2: "Swallows eat, drink and even sleep on the wing during migration." },
+  // 25 Thrush
+  { fact1: "The song thrush smashes snail shells against a rock — it has a favourite 'anvil' stone it returns to.", fact2: "Thrushes are famous for repeating each phrase of their song two or three times." },
+  // 26 Warbler
+  { fact1: "Some warblers sing at night during migration to communicate with others flying overhead.", fact2: "The reed warbler raises cuckoo chicks without realising the egg isn't its own." },
+  // 27 Kingfisher
+  { fact1: "The kingfisher dives into water at 40km/h, adjusting for light refraction to hit its target precisely.", fact2: "The bullet-shaped beak of the kingfisher inspired the design of Japan's high-speed Shinkansen train." },
+  // 28 Woodpecker
+  { fact1: "A woodpecker's skull has special shock-absorbing features that protect its brain from hammering.", fact2: "Woodpeckers drum up to 20 times per second — their long tongues wrap around their skull to cushion each blow." },
+  // 29 Nuthatch
+  { fact1: "Nuthatches are the only birds that can walk headfirst down tree trunks.", fact2: "They wedge nuts into bark crevices and hack them open — hence the name 'nuthatch'." },
+  // 30 Chickadee
+  { fact1: "Chickadees can hide thousands of seeds and remember every hiding spot for months.", fact2: "Their brain actually grows new neurons each autumn to handle the increased memory demands." },
+  // 31 Mockingbird
+  { fact1: "A mockingbird can learn over 200 songs and mimic other birds, frogs and even car alarms.", fact2: "Males sing continuously through the night during breeding season to attract a mate." },
+  // 32 Bluejay
+  { fact1: "Blue jays mimic hawk calls to scare other birds away from food sources.", fact2: "Their blue colour isn't from pigment — it's caused by light scattering through feather structure." },
+  // 33 Oriole
+  { fact1: "Baltimore orioles weave hanging basket nests so intricate they can take up to 15 days to complete.", fact2: "Orioles love the colour orange — you can attract them with orange halves placed in your garden." },
+  // 34 Grosbeak
+  { fact1: "The grosbeak's enormous beak can crack cherry pits that would be impossible for most birds.", fact2: "Male rose-breasted grosbeaks share incubation duties and even sing quietly while sitting on the nest." },
+  // 35 Sandpiper
+  { fact1: "The bar-tailed godwit sandpiper flies 12,000km non-stop from Alaska to New Zealand.", fact2: "Sandpipers use their sensitive bill tips to detect prey hidden under sand by feeling vibrations." },
+  // 36 Plover
+  { fact1: "The killdeer plover fakes a broken wing to lure predators away from its nest.", fact2: "Plover chicks are born fully feathered and running within hours of hatching." },
+  // 37 Cormorant
+  { fact1: "Cormorants lack waterproof feathers so they must stand with wings spread to dry after diving.", fact2: "In China and Japan, fishermen have trained cormorants to catch fish for thousands of years." },
+  // 38 Egret
+  { fact1: "Great egrets were nearly hunted to extinction in the 1800s for their plumes used in hat fashion.", fact2: "The egret is the symbol of the National Audubon Society, founded to protect birds from hunting." },
+  // 39 Ibis
+  { fact1: "The sacred ibis was worshipped in ancient Egypt as the symbol of the god Thoth.", fact2: "Ibises use their curved bills to probe mud for crabs, frogs and insects." },
+  // 40 Flamingo
+  { fact1: "Flamingos are born grey — their pink colour comes from pigments in the shrimp and algae they eat.", fact2: "Flamingos can only eat with their heads upside down, filtering water through their specialised bills." },
+  // 41 Osprey
+  { fact1: "Ospreys are the only hawk that plunges feet-first into water to catch fish.", fact2: "Their outer toe is reversible, letting them grip fish with two toes in front and two behind." },
+  // 42 Kestrel
+  { fact1: "Kestrels can see ultraviolet light, which helps them track vole urine trails invisible to humans.", fact2: "The kestrel is the only UK bird of prey that can truly hover in still air." },
+  // 43 Merlin
+  { fact1: "Merlins are fearless — they regularly chase birds much larger than themselves.", fact2: "Medieval noblewomen traditionally flew merlins for falconry, as they were considered a lady's bird." },
+  // 44 Harrier
+  { fact1: "Harriers fly low over fields with their wings in a shallow V, tilting to listen for prey in the grass.", fact2: "Male hen harriers perform a spectacular 'sky-dancing' display of loops and dives to attract females." },
+  // 45 Buzzard
+  { fact1: "Buzzards are one of Britain's most common large birds of prey, often seen soaring on thermals.", fact2: "They eat almost anything — rabbits, worms, beetles, and even carrion." },
+  // 46 Vulture
+  { fact1: "Vultures have stomach acid so strong it destroys anthrax and botulism bacteria found in rotting carcasses.", fact2: "A group of vultures feeding is called a 'wake'. Circling in the sky, they are a 'kettle'." },
+  // 47 Condor
+  { fact1: "The California condor has a wingspan of nearly 3 metres — the largest of any North American bird.", fact2: "Condors were extinct in the wild in 1987 but a captive breeding programme has brought them back." },
+  // 48 Albatross
+  { fact1: "An albatross can fly over a million kilometres in its lifetime without ever touching land.", fact2: "Albatrosses sleep on the wing during long ocean crossings." },
+  // 49 Petrel
+  { fact1: "Storm petrels look like they're walking on water as they hover and patter their feet on the surface.", fact2: "Petrels can smell their burrow from far out at sea, navigating home by scent." },
+  // 50 Gannet
+  { fact1: "Gannets dive from 30 metres at 100km/h, hitting the water like an arrow to catch fish.", fact2: "Their nostrils are inside their mouths — essential protection during those high-speed plunges." },
+  // 51 Puffin
+  { fact1: "Puffins can carry up to 62 small fish in their bill at once, thanks to backward-facing spines on their tongue.", fact2: "Puffins spend most of their life at sea and only come to land to breed." },
+  // 52 Tern
+  { fact1: "The Arctic tern makes the longest migration of any animal — 90,000km round trip from pole to pole.", fact2: "Despite their small size, terns will fearlessly dive-bomb humans who stray near their nests." },
+  // 53 Avocet
+  { fact1: "Avocets sweep their upturned bills from side to side through shallow water to sift out tiny creatures.", fact2: "The avocet is the symbol of the RSPB, the UK's largest wildlife conservation charity." },
+  // 54 Curlew
+  { fact1: "The curlew's haunting call is considered one of the most evocative sounds in nature.", fact2: "Their long curved bill lets them probe deep into mud to find worms and shellfish." },
+  // 55 Dunlin
+  { fact1: "Dunlins flock in thousands, performing breathtaking aerial displays over coastal mudflats.", fact2: "In winter their plumage is plain grey, but in summer they develop a distinctive black belly patch." },
+  // 56 Godwit
+  { fact1: "The bar-tailed godwit holds the record for the longest non-stop flight of any bird — 13,000km.", fact2: "Before migrating, godwits double their body weight and shrink some internal organs to save weight." },
+  // 57 Redshank
+  { fact1: "Redshanks are extremely alert and take flight at the slightest disturbance, earning the nickname 'sentinel of the marshes'.", fact2: "Their loud, piping alarm call warns all other wading birds of approaching danger." },
+  // 58 Turnstone
+  { fact1: "Turnstones flip over stones, seaweed and shells with their short strong bills to find food beneath.", fact2: "They are remarkably bold and will feed right alongside humans on harbour walls." },
+  // 59 Pheasant
+  { fact1: "Pheasants were introduced to Britain by the Romans over 2,000 years ago.", fact2: "The male's spectacular plumage is used entirely for attracting females — he plays no part in raising chicks." },
+  // 60 Partridge
+  { fact1: "Partridges pair for life and both parents share the duties of raising their large brood.", fact2: "A covey of partridges huddle together in a circle at night, tails inward, to conserve warmth." },
+  // 61 Grouse
+  { fact1: "Red grouse survive Scottish winters entirely on heather shoots — one of the most specialised diets of any bird.", fact2: "Male grouse make a distinctive 'go-back, go-back' call at dawn to defend their territory." },
+  // 62 Quail
+  { fact1: "Quails are the only migratory game bird — most game birds stay in one place year-round.", fact2: "Their 'wet-my-lips' call is a classic sound of warm summer farmland." },
+  // 63 Turkey
+  { fact1: "Wild turkeys can fly at 88km/h in short bursts, despite their large size.", fact2: "Benjamin Franklin reportedly preferred the turkey to the bald eagle as America's national symbol." },
+  // 64 Peacock
+  { fact1: "The peacock's magnificent tail makes up 60% of its total body length.", fact2: "Research suggests peahens choose mates based on the quality of the male's call, not just his tail." },
+  // 65 Macaw
+  { fact1: "Macaws can live for 60-80 years in captivity — outliving many of their owners.", fact2: "They eat clay from riverbanks to neutralise toxins in the unripe seeds that form part of their diet." },
+  // 66 Cockatoo
+  { fact1: "Cockatoos are the only parrots with a moveable crest, which they raise to communicate emotions.", fact2: "A cockatoo named Snowball became famous for dancing in time to music, demonstrating a sense of rhythm." },
+  // 67 Parakeet
+  { fact1: "Ring-necked parakeets have established wild colonies in London and other European cities.", fact2: "Parakeets in the wild use hollow trees for nesting and will fiercely defend their cavity." },
+  // 68 Lorikeet
+  { fact1: "Lorikeets have a brush-tipped tongue specially adapted for feeding on nectar and pollen.", fact2: "Rainbow lorikeets are so colourful they are sometimes mistaken for escaped pet birds, even in the wild." },
+  // 69 Cockatiel
+  { fact1: "Cockatiels are the most popular pet parrot in the world after the budgerigar.", fact2: "Males whistle elaborate songs to woo females and will serenade their own reflection." },
+  // 70 Toucan
+  { fact1: "The toucan's enormous bill is filled with a spongy network of bone — it's very light despite its size.", fact2: "Toucans regulate their body temperature through their bill, pumping blood to it to release heat." },
+  // 71 Hornbill
+  { fact1: "The female hornbill seals herself inside a tree hollow with mud during nesting — the male feeds her through a tiny slit.", fact2: "The hornbill's casque (the growth on top of its bill) amplifies its calls in the rainforest." },
+  // 72 Kingbird
+  { fact1: "Eastern kingbirds fearlessly attack crows, hawks and even eagles that enter their territory.", fact2: "They have a hidden red crown patch they flash only when extremely agitated." },
+  // 73 Flycatcher
+  { fact1: "Flycatchers catch insects in mid-air with an audible snap of their bill.", fact2: "Many flycatchers return to the exact same territory every year after migrating thousands of miles." },
+  // 74 Vireo
+  { fact1: "The red-eyed vireo sings persistently all day long — one individual was recorded singing 22,000 times in a single day.", fact2: "Vireos weave their cup nests using spider silk, which stretches as the chicks grow." },
+  // 75 Tanager
+  { fact1: "There are over 240 species of tanager — they are the most colourful family of birds in the Americas.", fact2: "Scarlet tanagers turn from brilliant red to olive-green after breeding season." },
+  // 76 Bunting
+  { fact1: "The painted bunting is sometimes called 'the most beautiful bird in North America'.", fact2: "Male indigo buntings learn their song from neighbouring males and local dialects develop over generations." },
+  // 77 Siskin
+  { fact1: "Siskins are highly nomadic, following the seed crops of different trees across the countryside.", fact2: "They are remarkably tame and will feed from hanging feeders just centimetres from a human hand." },
+  // 78 Redpoll
+  { fact1: "Redpolls can survive Arctic winters by storing up to 2g of seeds in a special pouch in their throat.", fact2: "Their red forehead cap is where they get their name — 'poll' is an old word for the top of the head." },
+  // 79 Crossbill
+  { fact1: "The crossbill's uniquely crossed bill is perfectly designed to prise seeds from pine cones.", fact2: "Crossbills can breed in any month of the year as long as there is a good supply of pine cones." },
+  // 80 Dipper
+  { fact1: "The dipper is the only songbird that swims — it walks along riverbeds searching for insects.", fact2: "Dippers blink with a white eyelid, visible as a flash when they wink." },
+  // 81 Treecreeper
+  { fact1: "Treecreepers always spiral upward around a tree trunk, then fly down to the base of the next tree to start again.", fact2: "Their curved bill fits perfectly into the gaps in bark where insects hide." },
+  // 82 Firecrest
+  { fact1: "The firecrest is one of Europe's smallest birds, weighing just 5-7 grams.", fact2: "Despite their tiny size, firecrests migrate at night across open sea between Britain and the continent." },
+  // 83 Stonechat
+  { fact1: "The stonechat's alarm call sounds exactly like two stones being knocked together — hence its name.", fact2: "Stonechats perch prominently on gorse tops, bobbing up and down to survey their territory." },
+  // 84 Wheatear
+  { fact1: "Wheatears that breed in Alaska fly all the way to Africa for winter — one of the longest migrations of any songbird.", fact2: "Their name comes from the Old English for 'white rump', visible as a flash when they fly." },
+  // 85 Whinchat
+  { fact1: "Whinchats have declined dramatically due to changes in farming — they need long grass for nesting.", fact2: "They migrate to Africa each winter and can cross the Sahara in a single flight." },
+  // 86 Nightjar
+  { fact1: "Nightjars are perfectly camouflaged against bark and leaf litter — they are almost impossible to spot at rest.", fact2: "Their churring song, produced on summer nights, can be heard from over a kilometre away." },
+  // 87 Nightingale
+  { fact1: "The nightingale's song is so complex it has inspired poets and composers for thousands of years.", fact2: "Males sing through the night in spring — unusually loud because they compete with dawn chorus birds during the day." },
+  // 88 Hoopoe
+  { fact1: "The hoopoe was voted Israel's national bird and appears in ancient Egyptian art.", fact2: "Their nest smells terrible — they produce a foul-smelling liquid as a defence against predators." },
+  // 89 Roller
+  { fact1: "The roller gets its name from its spectacular tumbling, rolling display flights performed at high speed.", fact2: "They are among Europe's most colourful birds, flashing brilliant blue and chestnut in flight." },
+  // 90 Bee-eater
+  { fact1: "Bee-eaters catch bees and wasps in flight, then rub them against a branch to remove the sting before eating.", fact2: "They nest in colonies, digging burrows up to a metre long in sandy banks." },
+  // 91 Sunbird
+  { fact1: "Sunbirds are the Old World equivalent of hummingbirds — vivid, fast-moving nectar feeders.", fact2: "Their curved bills match the exact shape of the flowers they feed from, in a perfect partnership." },
+  // 92 Lyrebird
+  { fact1: "The superb lyrebird is the world's greatest mimic — it can perfectly reproduce chainsaws, camera shutters and car alarms.", fact2: "The male's tail, shaped like a lyre, takes seven years to develop its full splendour." },
+  // 93 Cassowary
+  { fact1: "The cassowary is considered the world's most dangerous bird — its dagger-like claw can deliver a lethal kick.", fact2: "They are vital to rainforest health, dispersing the seeds of over 150 plant species through their droppings." },
+  // 94 Kookaburra
+  { fact1: "The kookaburra's loud laughing call is often used in films to represent a generic jungle sound.", fact2: "Kookaburras are kingfishers that rarely eat fish — they prefer snakes, lizards and large insects." },
+  // 95 Bowerbird
+  { fact1: "Male bowerbirds build elaborate decorated structures called bowers to attract females — they are not nests.", fact2: "They collect blue objects obsessively: bottle caps, feathers, berries — and steal them from rivals." },
+  // 96 Frigatebird
+  { fact1: "Frigatebirds can stay airborne for up to two months without landing, sleeping in short bursts while flying.", fact2: "Males inflate a brilliant red throat pouch to the size of a balloon to attract females." },
+  // 97 Roadrunner
+  { fact1: "Roadrunners can run at 32km/h — fast enough to catch rattlesnakes, which they kill by smashing against rocks.", fact2: "They absorb morning sunlight through dark patches of skin on their back to warm up quickly in the desert." },
+  // 98 Quetzal
+  { fact1: "The resplendent quetzal was sacred to the Maya and Aztec civilisations and considered more valuable than gold.", fact2: "Its tail feathers grow up to a metre long during breeding season, longer than the rest of its body." },
+  // 99 Bird of Paradise
+  { fact1: "Male birds of paradise perform extraordinary dances, some transforming into geometric shapes using their feathers.", fact2: "Early European explorers received only the skins without legs, believing they floated from paradise." },
+  // 100 Shoebill
+  { fact1: "The shoebill's massive bill is shaped like a Dutch clog — it produces a loud machine-gun bill-clattering sound.", fact2: "Shoebills can stand motionless for hours waiting to ambush lungfish, earning them the nickname 'statue bird'." },
 ];
 
 </script>
@@ -750,6 +1027,43 @@ function playBawk() {
       osc.stop(now  + i * 0.06 + 0.15);
     });
   } catch (e) { /* audio not available */ }
+}
+
+/** Play a triumphant fanfare on level completion. */
+function playFanfare() {
+  try {
+    const ctx = getAudioCtx();
+    const now = ctx.currentTime;
+
+    // Rising arpeggio: C E G C (major chord spread out)
+    const notes = [523, 659, 784, 1047];
+    notes.forEach((freq, i) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + i * 0.12);
+      gain.gain.setValueAtTime(0, now + i * 0.12);
+      gain.gain.linearRampToValueAtTime(0.22, now + i * 0.12 + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.4);
+      osc.start(now + i * 0.12);
+      osc.stop(now  + i * 0.12 + 0.45);
+    });
+
+    // Final held chord
+    [523, 659, 784].forEach((freq, i) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + 0.6);
+      gain.gain.setValueAtTime(0.12, now + 0.6);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
+      osc.start(now + 0.6);
+      osc.stop(now  + 1.5);
+    });
+
+  } catch(e) { /* audio not available */ }
 }
 
 </script>
@@ -1206,6 +1520,22 @@ function startLevel(levelIdx) {
   updateBuilderDisplay();
   updateTimerUI();
   showScreen('game');
+  showBirdInfo(levelIdx);   // show bird facts card before timer starts
+}
+
+function showBirdInfo(levelIdx) {
+  const facts = BIRD_FACTS[levelIdx] || { fact1: '', fact2: '' };
+  document.getElementById('bird-info-emoji').textContent  = BIRD_EMOJIS[levelIdx];
+  document.getElementById('bird-info-level').textContent  = 'Level ' + (levelIdx + 1);
+  document.getElementById('bird-info-name').textContent   = BIRDS[levelIdx];
+  document.getElementById('bird-fact-1').textContent      = facts.fact1;
+  document.getElementById('bird-fact-2').textContent      = facts.fact2;
+  document.getElementById('bird-info-modal').classList.add('active');
+  // Timer doesn't start until player dismisses
+}
+
+function dismissBirdInfo() {
+  document.getElementById('bird-info-modal').classList.remove('active');
   startTimer();
 }
 
