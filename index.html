@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0042)file:///C:/Users/kb/Downloads/index_6.html -->
+<!-- saved from url=(0042)file:///C:/Users/kb/Downloads/index_7.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -335,6 +335,9 @@ body {
 .pause-overlay p  { font-size:12px; color:var(--text-light); }
 
 /* ── BIRD INFO MODAL ── */
+#bird-info-modal {
+  z-index: 300;  /* above everything including pause overlay */
+}
 .bird-info-card {
   max-width: 340px;
   background: linear-gradient(160deg, #f0ebe0 0%, #e8f4ec 100%);
@@ -1530,8 +1533,10 @@ function showBirdInfo(levelIdx) {
   document.getElementById('bird-info-name').textContent   = BIRDS[levelIdx];
   document.getElementById('bird-fact-1').textContent      = facts.fact1;
   document.getElementById('bird-fact-2').textContent      = facts.fact2;
-  document.getElementById('bird-info-modal').classList.add('active');
-  // Timer doesn't start until player dismisses
+  // Small delay so screen transition finishes before modal appears
+  setTimeout(() => {
+    document.getElementById('bird-info-modal').classList.add('active');
+  }, 80);
 }
 
 function dismissBirdInfo() {
