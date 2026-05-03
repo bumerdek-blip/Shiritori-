@@ -759,6 +759,30 @@ function playBawk() {
  *
  * All 10 tiles are shuffled together so their position is random.
  */
+/**
+ * Check how many words in COMMON_WORDS can be spelled using the given
+ * letter array (each letter used at most once, matching tile counts).
+ * Only counts words that start with mustLetter (the required chain letter).
+ */
+function countPlayableWords(letters, mustLetter) {
+  const freq = {};
+  letters.forEach(l => { freq[l] = (freq[l] || 0) + 1; });
+
+  let count = 0;
+  for (const word of COMMON_WORDS) {
+    if (word.length < 3) continue;
+    if (word[0] !== mustLetter.toLowerCase()) continue;
+    const needed = {};
+    for (const ch of word) needed[ch] = (needed[ch] || 0) + 1;
+    let fits = true;
+    for (const [ch, n] of Object.entries(needed)) {
+      if ((freq[ch] || 0) < n) { fits = false; break; }
+    }
+    if (fits) { count++; if (count >= 5) return count; }
+  }
+  return count;
+}
+
 function generateTiles(currentWord) {
   const w = currentWord.toUpperCase();
 
@@ -770,16 +794,38 @@ function generateTiles(currentWord) {
 
   // Plain tiles: fill up to 10 total
   const plainCount = 10 - 1 - bonusLetters.length;
+
+  // Fixed letters (must + bonus) that are always present
+  const fixedLetters = [mustLetter, ...bonusLetters].map(l => l.toLowerCase());
+
+  // Generate plain letters, retrying until we get at least 5 playable words
   let plainLetters = [];
-  let attempts = 0;
-  do {
+  let bestPlain = null;
+  let bestScore = 0;
+  const MAX_ATTEMPTS = 40;
+
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     plainLetters = [];
     for (let i = 0; i < plainCount; i++) {
       plainLetters.push(LETTER_FREQ[Math.floor(Math.random() * LETTER_FREQ.length)]);
     }
-    attempts++;
-    // Ensure at least 2 vowels in the plain set
-  } while (attempts < 20 && plainLetters.filter(l => 'AEIOU'.includes(l)).length < 2);
+
+    // Require at least 2 vowels in plain set
+    const vowels = plainLetters.filter(l => 'AEIOU'.includes(l)).length;
+    if (vowels < 2) continue;
+
+    const allLetters = [...fixedLetters, ...plainLetters.map(l => l.toLowerCase())];
+    const score = countPlayableWords(allLetters, mustLetter);
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestPlain = [...plainLetters];
+      if (score >= 5) break;  // good enough — stop early
+    }
+  }
+
+  // Use best found set (may be < 5 if mustLetter is very rare like X, Q, Z)
+  plainLetters = bestPlain || plainLetters;
 
   // Build tile objects
   const tiles = [
