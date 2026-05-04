@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0042)file:///C:/Users/kb/Downloads/index_7.html -->
+<!-- saved from url=(0043)file:///C:/Users/kb/Downloads/index_10.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -163,6 +163,11 @@ body {
 }
 .level-btn .lnum  { font-size:8px; opacity:0.7; margin-bottom:1px; }
 .level-btn .lbird { font-size:16px; margin-bottom:1px; }
+.level-btn .lname { font-size:8px; line-height:1.1; margin-top:1px; }
+.level-btn .lbird-art { display:flex; align-items:center; justify-content:center; margin-bottom:1px; }
+.level-btn .lbird-art svg { width:36px; height:36px; image-rendering:pixelated; border-radius:5px; }
+.level-btn.completed .lbird-art svg { filter: brightness(1.3); }
+.level-btn.locked .lbird-lock { font-size:18px; margin-bottom:1px; }
 .level-btn.unlocked  { background:linear-gradient(135deg,#e8f4ec,#d4eadc); border-color:rgba(74,124,89,0.3); color:var(--bark); }
 .level-btn.unlocked:hover { transform:scale(1.08); border-color:var(--leaf); }
 .level-btn.completed { background:linear-gradient(135deg,var(--leaf),#3d6b4a); color:white; border-color:var(--leaf); }
@@ -342,12 +347,18 @@ body {
   max-width: 340px;
   background: linear-gradient(160deg, #f0ebe0 0%, #e8f4ec 100%);
 }
-.bird-info-emoji {
-  font-size: 64px;
-  display: block;
-  text-align: center;
-  margin-bottom: 4px;
+.bird-info-img {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
   animation: bob 3s ease-in-out infinite;
+}
+.bird-info-img svg {
+  width: 96px;
+  height: 96px;
+  image-rendering: pixelated;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
 }
 .bird-info-level {
   text-align: center;
@@ -498,7 +509,7 @@ body {
 <!-- BIRD INFO MODAL -->
 <div class="modal-overlay" id="bird-info-modal">
   <div class="modal-card bird-info-card">
-    <span class="bird-info-emoji" id="bird-info-emoji">🐦</span>
+    <div class="bird-info-img" id="bird-info-img"></div>
     <div class="bird-info-level" id="bird-info-level">Level 1</div>
     <div class="bird-info-name" id="bird-info-name">Robin</div>
     <div class="bird-info-facts">
@@ -860,6 +871,28 @@ const BIRD_FACTS = [
   // 100 Shoebill
   { fact1: "The shoebill's massive bill is shaped like a Dutch clog — it produces a loud machine-gun bill-clattering sound.", fact2: "Shoebills can stand motionless for hours waiting to ambush lungfish, earning them the nickname 'statue bird'." },
 ];
+
+</script>
+<script>
+const BIRD_ART_DATA = {"grids":{"perching":"................\n................\n......BBB.......\n.....BBBBB......\n.....BEBBB......\n.....BBBBB......\n....BWWWWBB.....\n....BWWWWWB.....\n....BAAABB......\n.....BBBAB......\n.....BBBAB......\n......BABB......\n......A..A......\n................\n................\n................","tiny":"................\n................\n.......BBB......\n......BBBBB.....\n......BEBBB.....\n......BBBBB.....\n.....BWWWBB.....\n.....BWWWWB.....\n.....BBABB......\n......BABA......\n......BABA......\n.......A.A......\n................\n................\n................\n................","wading":"....BBB.........\n....BBAB........\n.....BBB........\n.....BBB........\n.....BBBBBB.....\n....BBBBBBBB....\n...BWWWWWWWBB...\n...BWWWWWWWBB...\n....BBBBBBBB....\n.....BBBBBBB....\n......BBB.BB....\n......BB...B....\n......BB...B....\n......A....A....\n................\n................","raptor":"................\n.....BBB........\n....BBBBB.......\n....BEBBB.......\n....BAAABB......\n...BWWWWWBB.....\n...BWWWWWWB.....\n...BBBBBBBBBB...\n...BBBBBBBBBB...\n....TTTTTTTB....\n.....TTTTTB.....\n......B.TB......\n......A..A......\n................\n................\n................","long_tail":"................\n................\n......BBB.......\n.....BBBBB......\n.....BEBBB......\n.....BBBBB......\n....BWWWWBB.....\n....BWWWWWB.....\n...BTTTTTTABB...\n..BTTTTTTTABB...\n..BTTTTTTABB....\n...BTTTTABB.....\n....A....A......\n................\n................\n................","seabird":"................\n................\n....WWWWWWWW....\n...WWWWWWWWWW...\n..BBBBBBBWWWW...\n..BEBB BBWWW....\n..BAAABBBWW.....\n..BBBBBBB.......\n...BBBBBBB......\n....BBBBABB.....\n.....BBABB......\n.....A..A.......\n................\n................\n................\n................","large_perching":"................\n.....BBBB.......\n....BBBBBB......\n....BEBBBB......\n....BBBBBB......\n...BWWWWWBB.....\n...BWWWWWWB.....\n...BAAABBBB.....\n....BBBABBB.....\n....BBBABBB.....\n.....BABBB......\n.....A...A......\n................\n................\n................\n................","parrot":"................\n.....HHHH.......\n....HHBBHH......\n....HEBB HH.....\n....HHBBHH......\n...BWWWWWBB.....\n...BWWWWWWB.....\n...BAABBBBBB....\n...BAABBBBBB....\n....BBBBBBBB....\n.....TTTTTTB....\n......TTTTB.....\n......A..A......\n................\n................\n................"},"grid_types":[0,1,0,0,2,0,1,0,3,2,2,2,2,4,0,3,0,0,3,4,5,5,0,5,0,1,0,0,1,1,0,0,0,6,1,1,5,2,2,2,3,3,3,3,3,3,3,5,5,5,5,5,2,2,1,2,2,2,0,0,0,1,6,4,7,7,7,7,7,7,0,0,1,1,0,1,1,1,0,0,1,1,0,0,0,0,0,0,0,0,1,4,2,0,0,5,0,4,4,2],"birds":[["#e8f4f8","#8B4513","#DC143C","#6B3410"],["#e8f4f8","#8B6914","#D2691E","#6B4F0F"],["#e8f4f8","#9ACD32","#FFD700","#6B8E23"],["#e8f4f8","#D3D3D3","#A9A9A9","#F5F5F5"],["#e8f4f8","#F5F5F5","#FF8C00","#E0E0E0"],["#e8f4f8","#1C1C1C","#4A4A4A","#0A0A0A"],["#e8f4f8","#A0785A","#C8A870","#7A5A3C"],["#e8f4f8","#8B6914","#C8A850","#5C4510"],["#e8f4f8","#8B4513","#FFFFFF","#5C2D09"],["#e8f4f8","#696969","#FFFFFF","#4A4A4A"],["#e8f4f8","#708090","#FFFFFF","#4A5568"],["#e8f4f8","#F5F5F5","#DC143C","#E0E0E0"],["#e8f4f8","#FFFFFF","#FF6347","#1C1C1C"],["#e8f4f8","#0A0A1A","#2A2A4A","#16162A"],["#e8f4f8","#4169E1","#FF8C00","#1E3A8A"],["#e8f4f8","#8B4513","#FFD700","#5C2D09"],["#e8f4f8","#DC143C","#FF6347","#8B0000"],["#e8f4f8","#808080","#9370DB","#5A5A5A"],["#e8f4f8","#708090","#FFFFFF","#1C1C1C"],["#e8f4f8","#1C1C1C","#FFFFFF","#0A0A0A"],["#e8f4f8","#F5F5F5","#FFD700","#E0E0E0"],["#e8f4f8","#FFFFFF","#FFD700","#808080"],["#e8f4f8","#1C3A1C","#9370DB","#0A1A0A"],["#e8f4f8","#1E3A8A","#DC143C","#4169E1"],["#e8f4f8","#8B4513","#F5DEB3","#5C2D09"],["#e8f4f8","#9ACD32","#FFD700","#6B8E23"],["#e8f4f8","#0080FF","#FF8C00","#0040A0"],["#e8f4f8","#1C1C1C","#DC143C","#FFFFFF"],["#e8f4f8","#4682B4","#FFFFFF","#2C5A8A"],["#e8f4f8","#1C1C1C","#FFFFFF","#8B6914"],["#e8f4f8","#808080","#FFFFFF","#505050"],["#e8f4f8","#4169E1","#FFFFFF","#1E3A8A"],["#e8f4f8","#FF8C00","#1C1C1C","#CC6600"],["#e8f4f8","#1C1C1C","#DC143C","#0A0A0A"],["#e8f4f8","#8B7355","#FFFFFF","#5C4A2A"],["#e8f4f8","#8B6914","#FFD700","#5C4510"],["#e8f4f8","#1A2A1A","#2ECC71","#0A1A0A"],["#e8f4f8","#FFFFF0","#FFD700","#E0E0D0"],["#e8f4f8","#FFFFFF","#DC143C","#E0E0E0"],["#e8f4f8","#FF69B4","#FF1493","#FF8FB0"],["#e8f4f8","#8B4513","#FFFFFF","#5C2D09"],["#e8f4f8","#CD853F","#4169E1","#8B5A2B"],["#e8f4f8","#708090","#D2691E","#4A5568"],["#e8f4f8","#B0C4DE","#FFFFFF","#8090A0"],["#e8f4f8","#8B4513","#F5DEB3","#5C2D09"],["#e8f4f8","#4A2A0A","#FF6347","#2A1A05"],["#e8f4f8","#0A0A0A","#FF6347","#FFFFFF"],["#e8f4f8","#FFFFFF","#FFD700","#1C1C1C"],["#e8f4f8","#2F4F4F","#FFFFFF","#1C2F2F"],["#e8f4f8","#FFFFFF","#FFD700","#1C1C1C"],["#e8f4f8","#1C1C1C","#FF6347","#FFFFFF"],["#e8f4f8","#FFFFFF","#FF6347","#1C1C1C"],["#e8f4f8","#FFFFFF","#8B4513","#1C1C1C"],["#e8f4f8","#8B7355","#C8B080","#5C4A2A"],["#e8f4f8","#A0A0A0","#FFFFFF","#606060"],["#e8f4f8","#CD853F","#8B4513","#8B5A2B"],["#e8f4f8","#8B4513","#DC143C","#5C2D09"],["#e8f4f8","#8B4513","#FFFFFF","#1C1C1C"],["#e8f4f8","#8B4513","#DC143C","#DAA520"],["#e8f4f8","#8B7355","#D2691E","#5C4A2A"],["#e8f4f8","#8B6914","#DC143C","#5C4510"],["#e8f4f8","#8B7355","#D2B48C","#5C4A2A"],["#e8f4f8","#2A1A0A","#FF6347","#4A3A1A"],["#e8f4f8","#008080","#FFD700","#006060"],["#e8f4f8","#DC143C","#4169E1","#FFD700"],["#e8f4f8","#FFFFFF","#FFD700","#E0E0E0"],["#e8f4f8","#32CD32","#FFD700","#228B22"],["#e8f4f8","#DC143C","#4169E1","#32CD32"],["#e8f4f8","#808080","#FFD700","#606060"],["#e8f4f8","#0A0A0A","#FFD700","#DC143C"],["#e8f4f8","#1C1C1C","#FF8C00","#0A0A0A"],["#e8f4f8","#808080","#FFD700","#505050"],["#e8f4f8","#808000","#FFD700","#506000"],["#e8f4f8","#9ACD32","#FFFFFF","#6B8E23"],["#e8f4f8","#DC143C","#1C1C1C","#8B0000"],["#e8f4f8","#4B0082","#6A0DAD","#2A0050"],["#e8f4f8","#9ACD32","#FFD700","#6B8E23"],["#e8f4f8","#8B6914","#DC143C","#5C4510"],["#e8f4f8","#DC143C","#FF6347","#8B0000"],["#e8f4f8","#8B4513","#FFFFFF","#5C2D09"],["#e8f4f8","#8B7355","#FFFFFF","#5C4A2A"],["#e8f4f8","#9ACD32","#FF8C00","#6B8E23"],["#e8f4f8","#1C1C1C","#FF8C00","#FFFFFF"],["#e8f4f8","#808080","#FFFFFF","#1C1C1C"],["#e8f4f8","#8B4513","#F5DEB3","#5C2D09"],["#2A1A0A","#8B6914","#D2B48C","#5C4510"],["#e8f4f8","#CD853F","#D2691E","#8B5A2B"],["#e8f4f8","#FF8C00","#1C1C1C","#FFFFFF"],["#e8f4f8","#4169E1","#8B4513","#1E3A8A"],["#e8f4f8","#32CD32","#FF8C00","#4169E1"],["#e8f4f8","#4B0082","#FFD700","#2A0050"],["#e8f4f8","#8B4513","#D2B48C","#5C2D09"],["#e8f4f8","#0A0A0A","#DC143C","#4169E1"],["#e8f4f8","#8B4513","#FFFFFF","#4169E1"],["#e8f4f8","#0A0A1A","#4169E1","#1C1C2A"],["#e8f4f8","#0A0A0A","#DC143C","#1C1C1C"],["#e8f4f8","#8B4513","#4169E1","#5C2D09"],["#e8f4f8","#228B22","#DC143C","#FFD700"],["#e8f4f8","#8B4513","#FFD700","#DC143C"],["#e8f4f8","#4A5568","#708090","#2A3548"]]};
+
+function renderBirdSVG(idx) {
+  const d = BIRD_ART_DATA;
+  const bird = d.birds[idx];
+  const [bg, body, accent, wing] = bird;
+  const gridName = Object.keys(d.grids)[d.grid_types[idx]];
+  const grid = d.grids[gridName].split('\n');
+  const P = 8;
+  const colorMap = {B:body,W:wing,A:accent,H:accent,E:'#111111',T:wing};
+  let rects = '';
+  grid.forEach((row, ri) => {
+    [...row].forEach((ch, ci) => {
+      const c = colorMap[ch];
+      if (c) rects += `<rect x="${ci*P}" y="${ri*P}" width="${P}" height="${P}" fill="${c}"/>`;
+    });
+  });
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" shape-rendering="crispEdges"><rect width="128" height="128" fill="${bg}" rx="12"/>${rects}</svg>`;
+}
 
 </script>
 <script>
@@ -1528,12 +1561,17 @@ function startLevel(levelIdx) {
 
 function showBirdInfo(levelIdx) {
   const facts = BIRD_FACTS[levelIdx] || { fact1: '', fact2: '' };
-  document.getElementById('bird-info-emoji').textContent  = BIRD_EMOJIS[levelIdx];
-  document.getElementById('bird-info-level').textContent  = 'Level ' + (levelIdx + 1);
-  document.getElementById('bird-info-name').textContent   = BIRDS[levelIdx];
-  document.getElementById('bird-fact-1').textContent      = facts.fact1;
-  document.getElementById('bird-fact-2').textContent      = facts.fact2;
-  // Small delay so screen transition finishes before modal appears
+
+  // Render pixel art bird image
+  const svgStr = renderBirdSVG(levelIdx);
+  const imgEl = document.getElementById('bird-info-img');
+  if (imgEl) imgEl.innerHTML = svgStr;
+
+  document.getElementById('bird-info-level').textContent = 'Level ' + (levelIdx + 1);
+  document.getElementById('bird-info-name').textContent  = BIRDS[levelIdx];
+  document.getElementById('bird-fact-1').textContent     = facts.fact1;
+  document.getElementById('bird-fact-2').textContent     = facts.fact2;
+
   setTimeout(() => {
     document.getElementById('bird-info-modal').classList.add('active');
   }, 80);
@@ -1771,10 +1809,16 @@ function buildLevelGrid() {
     const open = i < STATE.unlockedLevels;
 
     btn.className = 'level-btn ' + (done ? 'completed' : open ? 'unlocked' : 'locked');
+
+    // Pixel art for unlocked/completed, lock icon for locked
+    const art = open
+      ? `<span class="lbird-art">${renderBirdSVG(i)}</span>`
+      : `<span class="lbird-lock">🔒</span>`;
+
     btn.innerHTML =
       `<span class="lnum">${i + 1}</span>` +
-      `<span class="lbird">${BIRD_EMOJIS[i]}</span>` +
-      `<span>${bird}</span>`;
+      art +
+      `<span class="lname">${bird}</span>`;
 
     if (open) btn.onclick = () => startLevel(i);
     grid.appendChild(btn);
